@@ -15,6 +15,9 @@ class Session():
     def recv(self, bytecount):
         pass
 
+    def test():
+        pass
+
 
 class TCPSession():
 
@@ -32,3 +35,10 @@ class TCPSession():
 
     def recv(self, recvcount):
         self.socket.recv(recvcount)
+
+    def test(self):
+        try:
+            self.socket.send(bytes('test\n', encoding='utf-8'))
+            return True
+        except BrokenPipeError:
+            return False

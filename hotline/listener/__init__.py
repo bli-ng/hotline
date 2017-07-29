@@ -1,5 +1,6 @@
 import threading
 import socket
+import logging
 from hotline.session import TCPSession
 
 
@@ -10,6 +11,7 @@ class Listener(threading.Thread):
 
     def __init__(self, sessions=[]):
         super().__init__()
+        self.logger = logging.getLogger(__name__)
         self.sessions = sessions
 
     def pool_sessions(self, sessions):
@@ -30,9 +32,13 @@ class TCPListener(Listener):
                                     type=socket.SOCK_STREAM)
         self.socket.bind((self.bind, self.port))
         self.socket.listen(5)
+        self.logger.info('Started listener: {0}:{1}'.format(self.bind,
+                                                            self.port))
         self.start()
 
     def run(self):
         while True:
-            new_session = TCPSession(open_socket=self.socket.accept()[0])
+            new_socket = self.socket.accept()
+            self.logger.info('{0} connected'.format(new_socket[1][0]))
+            new_session = TCPSession(open_socket=new_socket[0])
             self.sessions.append(new_session)
