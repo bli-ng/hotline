@@ -1,30 +1,7 @@
 import threading
 import subprocess
-import queue
 import io
-import time
-
-
-class ShellBuffer(threading.Thread):
-    '''
-    Buffers output for LocalShell
-    '''
-
-    def __init__(self, infile):
-        threading.Thread.__init__(self)
-        self._infile = infile
-        self._queue = queue.Queue()
-        self.start()
-
-    def run(self):
-        for line in self._infile:
-            self._queue.put(line.decode('utf-8'))
-
-    def empty(self):
-        return not self.is_alive() or self._queue.empty()
-
-    def read(self):
-        return self._queue.get()
+from hotline.async_buffer import AsyncBuffer
 
 
 class Shell():
@@ -47,8 +24,8 @@ class Shell():
             encoding='utf-8',
             line_buffering=True,  # send data on newline
         )
-        self._shellout = ShellBuffer(self._proc.stdout)
-        self._shellerr = ShellBuffer(self._proc.stderr)
+        self._shellout = AsyncBuffer(self._proc.stdout)
+        self._shellerr = AsyncBuffer(self._proc.stderr)
 
     def can_read(self):
         '''Return true if output can be read'''

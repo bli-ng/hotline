@@ -1,19 +1,5 @@
 import socket
-
-
-class Session():
-    '''
-    Generic class for sessions to inherit from
-    '''
-
-    def __init__(self):
-        pass
-
-    def send(self, message):
-        pass
-
-    def recv(self, bytecount):
-        pass
+from hotline.async_buffer import AsyncBuffer
 
 
 class TCPSession():
@@ -26,6 +12,10 @@ class TCPSession():
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((host, port))
+        self._buffer = AsyncBuffer(open(self.socket.fileno()))
+
+    def __str__(self):
+        return 'TCP - ' + self.socket.getpeername()
 
     def send(self, message):
         self.socket.send(message.encode('utf-8'))
@@ -33,14 +23,12 @@ class TCPSession():
     def send_binary(self, binary):
         self.socket.send(binary)
 
+    def can_recv(self):
+        '''Return true if output can be read'''
+        return not self._buffer.empty()
+
     def recv(self):
-        return self.socket.recv(1024).decode('utf-8')
-
-    def recv_exact(self, recvcount):
-        return self.socket.recv(recvcount).decode('utf-8')
-
-    def recv_binary(self):
-        return self.socket.recv(1024)
-
-    def recv_binary_exact(self, recvcount):
-        return self.socket.recv(recvcount)
+        '''Return the shell output'''
+        if not self._buffer.empty():
+            return self._buffer.read()
+        return None

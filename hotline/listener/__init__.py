@@ -42,3 +42,6 @@ class TCPListener(Listener):
             self.logger.info('{0} connected'.format(new_socket[1][0]))
             new_session = TCPSession(open_socket=new_socket[0])
             self.sessions.append(new_session)
+
+    def __str__(self):
+        return 'TCP - ' + self.bind + ' - ' + str(self.port)
