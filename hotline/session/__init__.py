@@ -15,7 +15,11 @@ class TCPSession():
         self._buffer = AsyncBuffer(open(self.socket.fileno()))
 
     def __str__(self):
-        return 'TCP - ' + self.socket.getpeername()
+        lhost = self.socket.getsockname()[0]
+        lport = str(self.socket.getsockname()[1])
+        rhost = self.socket.getpeername()[0]
+        rport = str(self.socket.getpeername()[1])
+        return lhost + ':' + lport + ' -> ' + rhost + ':' + rport
 
     def send(self, message):
         self.socket.send(message.encode('utf-8'))
